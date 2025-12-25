@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoGuard - Security & Agriculture</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header / Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h1>EcoGuard</h1>
+            </div>
+            
+            <!-- Dashboard View Switcher -->
+            <div class="mode-switcher">
+                <button id="securityModeBtn" class="mode-btn active" data-mode="security">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </button>
+                <button id="healthModeBtn" class="mode-btn" data-mode="health">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>Health</span>
+                </button>
+                <button id="agricultureModeBtn" class="mode-btn" data-mode="agriculture">
+                    <i class="fas fa-leaf"></i>
+                    <span>Agriculture</span>
+                </button>
+            </div>
+            
+            <!-- System Mode Selector -->
+            <div class="system-mode-selector">
+                <span class="mode-label">System Mode:</span>
+                <div class="system-mode-buttons">
+                    <button class="system-mode-btn active" data-system-mode="security" title="Security Surveillance">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Security</span>
+                    </button>
+                    <button class="system-mode-btn" data-system-mode="health" title="Crop Health Monitoring">
+                        <i class="fas fa-seedling"></i>
+                        <span>Health</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- System Status -->
+            <div class="system-status">
+                <div class="status-indicator">
+                    <span class="status-dot" id="systemStatusDot"></span>
+                    <span class="status-text" id="systemStatusText">Connecting...</span>
+                </div>
+                <button class="settings-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        
+        <!-- ============================================ -->
+        <!-- SECURITY MODE DASHBOARD -->
+        <!-- ============================================ -->
+        <div id="securityDashboard" class="dashboard-mode active">
+            
+            <!-- Top Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon security">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalDetections">0</h3>
+                        <p>Total Detections</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="systemEvents">0</h3>
+                        <p>System Events</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="recordingsCount">0</h3>
+                        <p>Video Recordings</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="peopleCount">0</h3>
+                        <p>People Detected</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Grid - Live Feed + Detection List -->
+            <div class="content-grid">
+                
+                <!-- Live Video Feed -->
+                <div class="card live-feed-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-camera"></i> Live Camera Feed</h2>
+                        <div class="card-controls">
+                            <select id="qualitySelect" class="quality-select">
+                                <option value="low">Low Quality</option>
+                                <option value="medium" selected>Medium Quality</option>
+                                <option value="high">High Quality</option>
+                            </select>
+                            <button id="snapshotBtn" class="icon-btn" title="Take Snapshot">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="video-container">
+                            <img id="liveStream" src="" alt="Live Feed" class="live-stream">
+                            <div class="stream-overlay">
+                                <span class="live-badge"><i class="fas fa-circle"></i> LIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Detections -->
+                <div class="card detections-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-list"></i> Recent Detections</h2>
+                        <button id="refreshDetections" class="icon-btn" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="detectionsList" class="detections-list">
+                            <!-- Detections will be populated by JavaScript -->
+                            <div class="no-data">
+                                <i class="fas fa-search"></i>
+                                <p>No recent detections</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Grid - Zones + Recordings -->
+            <div class="content-grid">
+                
+                <!-- Zone Statistics -->
+                <div class="card zones-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-map-marked-alt"></i> Zone Activity</h2>
+                        <select id="zonePeriod" class="period-select">
+                            <option value="1">Last 24 Hours</option>
+                            <option value="7" selected>Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="zoneChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recordings List -->
+                <div class="card recordings-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-film"></i> Video Recordings</h2>
+                        <select id="recordingSort" class="sort-select">
+                            <option value="newest" selected>Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="largest">Largest First</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div id="recordingsList" class="recordings-list">
+                            <!-- Recordings will be populated by JavaScript -->
+                            <div class="no-data">
+                                <i class="fas fa-video-slash"></i>
+                                <p>No recordings available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ============================================ -->
+        <!-- HEALTH MONITORING DASHBOARD -->
+        <!-- ============================================ -->
+        <div id="healthDashboard" class="dashboard-mode">
+            <div id="healthSection" class="health-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-heartbeat"></i> Crop Health Monitoring</h2>
+                    <span class="section-badge">Active</span>
+                </div>
+                
+                <!-- Camera Source & Upload Controls -->
+                <div class="card camera-controls-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-camera"></i> Image Source</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="camera-source-selector">
+                            <div class="source-option">
+                                <label>
+                                    <input type="radio" name="imageSource" value="camera" checked>
+                                    <i class="fas fa-video"></i> WiFi Camera (RTSP)
+                                </label>
+                                <input type="text" id="rtspUrl" placeholder="rtsp://172.16.122.6:554/1" value="rtsp://172.16.122.6:554/1">
+                            </div>
+                            <div class="source-option">
+                                <label>
+                                    <input type="radio" name="imageSource" value="device">
+                                    <i class="fas fa-laptop"></i> Device Camera
+                                </label>
+                                <select id="deviceCamera">
+                                    <option value="0">Camera 0</option>
+                                    <option value="1">Camera 1</option>
+                                </select>
+                            </div>
+                            <div class="source-option">
+                                <label>
+                                    <input type="radio" name="imageSource" value="upload">
+                                    <i class="fas fa-upload"></i> Upload Image
+                                </label>
+                                <div class="upload-area" id="uploadArea">
+                                    <input type="file" id="imageUpload" accept="image/jpeg,image/jpg,image/png" style="display:none;">
+                                    <button id="selectFileBtn" class="btn btn-secondary">
+                                        <i class="fas fa-file-image"></i> Select Image
+                                    </button>
+                                    <span id="selectedFileName" class="file-name"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="connectCameraBtn" class="btn btn-primary">
+                                <i class="fas fa-plug"></i> Connect Source
+                            </button>
+                            <button id="captureBtn" class="btn btn-success">
+                                <i class="fas fa-camera-retro"></i> Capture & Analyze
+                            </button>
+                        </div>
+                        <div id="cameraStatus" class="status-message"></div>
+                    </div>
+                </div>
+
+                <!-- Health Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon health">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalHealthScans">0</h3>
+                            <p>Total Scans</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="healthyCount">0</h3>
+                            <p>Healthy Plants</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-disease"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="diseaseCount">0</h3>
+                            <p>Diseases Detected</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="cropsMonitored">0</h3>
+                            <p>Crops Monitored</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Health Content Grid -->
+                <div class="content-grid">
+                    <!-- Recent Disease Detections -->
+                    <div class="card health-detections-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-virus"></i> Recent Detections</h2>
+                            <button id="refreshHealthDetections" class="icon-btn" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="healthDetectionsList" class="health-detections-list">
+                                <div class="no-data">
+                                    <i class="fas fa-search"></i>
+                                    <p>No detections yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Disease Statistics -->
+                    <div class="card disease-stats-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-chart-pie"></i> Disease Distribution</h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="diseaseStatsList" class="disease-stats-list">
+                                <div class="no-data">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No disease data available</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Monitored Crops -->
+                <div class="card crops-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-spa"></i> Monitored Crops</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="cropsList" class="crops-list">
+                            <div class="no-data">
+                                <i class="fas fa-seedling"></i>
+                                <p>No crops monitored yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- AGRICULTURE DASHBOARD -->
+        <!-- ============================================ -->
+        <div id="agricultureDashboard" class="dashboard-mode">
+            <div id="agricultureSection" class="agriculture-section">
+            <!-- Top Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon agriculture">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="soilMoisture">--</h3>
+                        <p>Soil Moisture (%)</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon temperature">
+                        <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="temperature">--</h3>
+                        <p>Temperature (°C)</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon humidity">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="humidity">--</h3>
+                        <p>Humidity (%)</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon light">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="lightLevel">--</h3>
+                        <p>Light (lux)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Grid - Sensor Chart + Controls -->
+            <div class="content-grid">
+                
+                <!-- Sensor History Chart -->
+                <div class="card sensor-chart-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> Sensor History</h2>
+                        <div class="card-controls">
+                            <select id="sensorType" class="sensor-select">
+                                <option value="soil_moisture">Soil Moisture</option>
+                                <option value="soil_temperature">Soil Temperature</option>
+                                <option value="air_temperature">Air Temperature</option>
+                                <option value="air_humidity">Air Humidity</option>
+                                <option value="light_intensity">Light Intensity</option>
+                            </select>
+                            <select id="historyPeriod" class="period-select">
+                                <option value="6">Last 6 Hours</option>
+                                <option value="12">Last 12 Hours</option>
+                                <option value="24" selected>Last 24 Hours</option>
+                                <option value="48">Last 48 Hours</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="sensorChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Irrigation Control -->
+                <div class="card irrigation-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-faucet"></i> Irrigation Control</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="irrigation-status">
+                            <div class="status-item">
+                                <span class="label">Pump Status:</span>
+                                <span id="pumpStatus" class="value">Standby</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Mode:</span>
+                                <span id="irrigationMode" class="value">Auto</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Water Today:</span>
+                                <span id="waterToday" class="value">0 L</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Last Irrigation:</span>
+                                <span id="lastIrrigation" class="value">--</span>
+                            </div>
+                        </div>
+                        
+                        <div class="irrigation-controls">
+                            <button id="startIrrigationBtn" class="control-btn start">
+                                <i class="fas fa-play"></i> Start Manual
+                            </button>
+                            <button id="stopIrrigationBtn" class="control-btn stop">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                            <button id="autoModeBtn" class="control-btn auto">
+                                <i class="fas fa-robot"></i> Auto Mode
+                            </button>
+                        </div>
+                        
+                        <div class="duration-control">
+                            <label for="irrigationDuration">Duration (minutes):</label>
+                            <input type="number" id="irrigationDuration" min="1" max="60" value="15">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Grid - All Sensors + Alerts -->
+            <div class="content-grid">
+                
+                <!-- All Sensor Readings -->
+                <div class="card sensors-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-microchip"></i> Sensor Readings</h2>
+                        <button id="refreshSensors" class="icon-btn" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="sensorReadings" class="sensor-readings">
+                            <!-- Sensors will be populated by JavaScript -->
+                            <div class="no-data">
+                                <i class="fas fa-plug"></i>
+                                <p>No sensor data available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Alerts -->
+                <div class="card alerts-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bell"></i> System Alerts</h2>
+                        <button id="refreshAlerts" class="icon-btn" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertsList" class="alerts-list">
+                            <!-- Alerts will be populated by JavaScript -->
+                            <div class="no-data">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No active alerts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Edge AI System | Raspberry Pi 3 | Offline & Privacy-First</p>
+        <div class="footer-links">
+            <a href="/api/docs" target="_blank">API Docs</a>
+            <span>|</span>
+            <a href="https://github.com/Techdee1/EdgeAI-IoT" target="_blank">GitHub</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

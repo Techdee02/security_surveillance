@@ -1,0 +1,70 @@
+# Security & Surveillance System Configuration
+
+camera:
+  source:  # Multiple videos will loop sequentially
+    - "data/test_videos/split-screen-of-security-cameras-footage-on-screen-of-people-at-front-desk-in--SBV-347094600-preview.mp4"
+    - "data/test_videos/surveillance-monitoring-observation-supervision-security-camera-view-persons-SBV-307890973-preview.mp4"
+  width: 640
+  height: 480
+  fps: 20
+
+detection:
+  model_path: "data/models/yolov8n.pt"
+  confidence_threshold: 0.25  # Lowered for multi-screen (smaller people)
+  input_size: 640  # Increased for better small object detection
+  frame_skip: 5  # Process every Nth frame (increased for better performance)
+  target_classes: ["person"]  # Only detect people
+
+zones:
+  enabled: true
+  definitions:
+    - name: "entrance"
+      x1: 100
+      y1: 100
+      x2: 300
+      y2: 300
+      color: [0, 255, 0]  # Green
+      alert_level: "low"
+    
+    - name: "restricted"
+      x1: 400
+      y1: 200
+      x2: 600
+      y2: 400
+      color: [0, 0, 255]  # Red
+      alert_level: "high"
+
+alerts:
+  gpio_enabled: false  # Set to true when running on Pi with GPIO
+  led_green_pin: 17
+  led_red_pin: 27
+  buzzer_pin: 22
+  alert_duration: 3  # seconds
+  cooldown: 5  # seconds between alerts
+
+recording:
+  enabled: true
+  output_dir: "data/recordings"
+  codec: "mp4v"  # H264 for Pi, mp4v for development
+  fps: 10
+  duration: 10  # seconds per clip
+  max_storage_mb: 1000  # Auto-delete old recordings
+
+behavioral_learning:
+  enabled: true
+  learning_period_hours: 48
+  normal_hours_start: 8  # 8 AM
+  normal_hours_end: 18  # 6 PM
+  normal_days: [1, 2, 3, 4, 5]  # Monday-Friday
+  anomaly_threshold: 0.7
+
+tamper_detection:
+  enabled: true
+  brightness_threshold: 20  # Alert if avg brightness drops below this
+  motion_variance_threshold: 10  # Alert if scene variance drops
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "data/logs/system.log"
+  max_size_mb: 10
+  backup_count: 3

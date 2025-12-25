@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data directories
+security_only/data/logs/*.log
+security_only/data/logs/*.db
+security_only/data/logs/*.db-journal
+security_only/data/recordings/*.avi
+security_only/data/recordings/*.mp4
+security_only/data/test_output/
+security_only/data/test_videos/*.mp4
+security_only/data/test_videos/*.avi
+security_only/data/test_videos/*.mov
+
+# Models (large files - users should download)
+security_only/data/models/*.pt
+security_only/data/models/*.pth
+security_only/data/models/*.onnx
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+nohup.out
+server.log

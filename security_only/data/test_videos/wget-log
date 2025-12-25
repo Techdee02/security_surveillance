@@ -1,0 +1,75 @@
+failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:15:44--  (try: 3)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:18:00--  (try: 4)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:20:20--  (try: 5)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:22:40--  (try: 6)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:25:01--  (try: 7)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:27:21--  (try: 8)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:29:45--  (try: 9)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:32:11--  (try:10)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:34:34--  (try:11)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:36:57--  (try:12)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:39:21--  (try:13)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:41:44--  (try:14)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:44:07--  (try:15)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:46:31--  (try:16)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:48:54--  (try:17)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:51:18--  (try:18)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:53:41--  (try:19)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Retrying.
+
+--2025-12-24 22:56:04--  (try:20)  https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4
+Connecting to sample-videos.com (sample-videos.com)|103.145.51.95|:443... failed: Connection timed out.
+Giving up.
+

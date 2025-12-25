@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Surveillance Dashboard</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>Security Surveillance</h1>
+            </div>
+            
+            <!-- System Status -->
+            <div class="system-status">
+                <div class="status-indicator">
+                    <span class="status-dot" id="systemStatusDot"></span>
+                    <span class="status-text" id="systemStatusText">Connecting...</span>
+                </div>
+                <!-- Test notification button (for debugging) -->
+                <button onclick="showAlertNotification({message: 'TEST ALERT - If you see this, notifications work!', severity: 'warning', timestamp: Date.now()/1000})" style="margin-left: 15px; padding: 8px 16px; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    Test Alert
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Top Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon security">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalDetections">0</h3>
+                    <p>Total Detections</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="activeAlerts">0</h3>
+                    <p>Active Alerts</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="recordingsCount">0</h3>
+                    <p>Recordings</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="currentFPS">0</h3>
+                    <p>FPS</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid - Live Feed + Detection List -->
+        <div class="content-grid">
+            
+            <!-- Live Video Feed -->
+            <div class="card live-feed-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-camera"></i> Live Camera Feed</h2>
+                </div>
+                <div class="card-body">
+                    <div class="video-container">
+                        <img id="liveStream" src="/api/security/video_feed" alt="Live Feed" class="live-stream">
+                        <div class="stream-overlay" id="streamOverlay">
+                            <p>Loading video stream...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Detections -->
+            <div class="card detections-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> Recent Detections</h2>
+                    <button id="refreshDetections" class="icon-btn" title="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="detectionsList" class="detections-list">
+                        <div class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <p>No detections yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Grid - Zones + Recordings -->
+        <div class="content-grid">
+            
+            <!-- Zone Statistics -->
+            <div class="card zones-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Detection Zones</h2>
+                </div>
+                <div class="card-body">
+                    <div id="zonesList" class="zones-list">
+                        <div class="no-data">
+                            <i class="fas fa-map"></i>
+                            <p>Loading zones...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recordings List -->
+            <div class="card recordings-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-film"></i> Video Recordings</h2>
+                </div>
+                <div class="card-body">
+                    <div id="recordingsList" class="recordings-list">
+                        <div class="no-data">
+                            <i class="fas fa-video"></i>
+                            <p>No recordings available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Security Surveillance System | Edge AI Processing</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // WebSocket connection for real-time updates
+        let ws = null;
+        let reconnectInterval = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard initialized');
+            
+            // Load initial data
+            loadDetections();
+            loadZones();
+            loadRecordings();
+            updateStats();
+            
+            // Connect WebSocket
+            connectWebSocket();
+            
+            // Set up refresh interval
+            setInterval(updateStats, 5000);
+            setInterval(loadDetections, 10000);
+            
+            // Refresh buttons
+            document.getElementById('refreshDetections').addEventListener('click', loadDetections);
+        });
+
+        // Connect to WebSocket for real-time updates
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/security`;
+            
+            try {
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = () => {
+                    console.log('WebSocket connected');
+                    updateSystemStatus('online', 'System Online');
+                    if (reconnectInterval) {
+                        clearInterval(reconnectInterval);
+                        reconnectInterval = null;
+                    }
+                };
+                
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+                
+                ws.onclose = () => {
+                    console.log('WebSocket disconnected');
+                    updateSystemStatus('offline', 'Reconnecting...');
+                    // Attempt reconnection
+                    if (!reconnectInterval) {
+                        reconnectInterval = setInterval(connectWebSocket, 5000);
+                    }
+                };
+            } catch (error) {
+                console.error('Failed to connect WebSocket:', error);
+            }
+        }
+
+        // Handle WebSocket messages
+        function handleWebSocketMessage(data) {
+            console.log('WebSocket message received:', data);
+            if (data.type === 'status') {
+                updateStats();
+            } else if (data.type === 'detection') {
+                loadDetections();
+            } else if (data.type === 'alert') {
+                console.log('ALERT RECEIVED:', data);
+                showAlertNotification(data);
+                updateStats();  // Refresh stats
+                loadDetections();  // Refresh detections
+            }
+        }
+        
+        // Show alert notification
+        function showAlertNotification(alert) {
+            console.log('Showing notification for:', alert);
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'alert-notification ' + alert.severity;
+            
+            // FORCE visibility with inline styles to override any CSS issues
+            notification.style.cssText = `
+                position: fixed !important;
+                top: 100px !important;
+                right: 30px !important;
+                z-index: 999999 !important;
+                min-width: 350px;
+                max-width: 450px;
+                background: #1e293b !important;
+                border: 3px solid #f59e0b !important;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
+                display: flex !important;
+                gap: 15px;
+                align-items: flex-start;
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-content">
+                    <strong>ALERT</strong>
+                    <p>${alert.message}</p>
+                    <span class="alert-time">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <button class="alert-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            console.log('Notification added to DOM');
+            console.log('Notification element:', notification);
+            console.log('Notification computed style:', window.getComputedStyle(notification));
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+            
+            // Play alert sound with Web Audio API (more reliable)
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                gainNode.gain.value = 0.3;
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+                console.log('Alert sound played');
+            } catch (e) {
+                console.error('Failed to play sound:', e);
+            }
+        }
+
+        // Update system status indicator
+        function updateSystemStatus(status, text) {
+            const dot = document.getElementById('systemStatusDot');
+            const statusText = document.getElementById('systemStatusText');
+            
+            dot.className = 'status-dot ' + status;
+            statusText.textContent = text;
+        }
+
+        // Load recent detections
+        async function loadDetections() {
+            try {
+                const response = await fetch('/api/security/detections?limit=20');
+                const data = await response.json();
+                
+                const list = document.getElementById('detectionsList');
+                
+                if (data.detections && data.detections.length > 0) {
+                    list.innerHTML = data.detections.map(det => `
+                        <div class="detection-item">
+                            <div class="detection-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="detection-info">
+                                <strong>Person Detected</strong>
+                                <span class="detection-time">${new Date(det.timestamp).toLocaleString()}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div class="no-data"><i class="fas fa-inbox"></i><p>No detections yet</p></div>';
+                }
+            } catch (error) {
+                console.error('Error loading detections:', error);
+            }
+        }
+
+        // Load zones
+        async function loadZones() {
+            try {
+                const response = await fetch('/api/security/zones');
+                const data = await response.json();
+                
+                const list = document.getElementById('zonesList');
+                
+                if (data.zones && data.zones.length > 0) {
+                    list.innerHTML = data.zones.map(zone => `
+                        <div class="zone-item">
+                            <div class="zone-info">
+                                <strong>${zone.name}</strong>
+                                <span>${zone.detection_count || 0} detections</span>
+                            </div>
+                            <span class="zone-status ${zone.enabled ? 'active' : 'inactive'}">
+                                ${zone.enabled ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div class="no-data"><i class="fas fa-map"></i><p>No zones configured</p></div>';
+                }
+            } catch (error) {
+                console.error('Error loading zones:', error);
+            }
+        }
+
+        // Load recordings
+        async function loadRecordings() {
+            try {
+                const response = await fetch('/api/security/recordings?sort=newest&limit=10');
+                const data = await response.json();
+                
+                const list = document.getElementById('recordingsList');
+                
+                if (data.recordings && data.recordings.length > 0) {
+                    list.innerHTML = data.recordings.map(rec => `
+                        <div class="recording-item">
+                            <div class="recording-icon">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <div class="recording-info">
+                                <strong>${rec.filename}</strong>
+                                <span>${rec.size_mb} MB</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div class="no-data"><i class="fas fa-video"></i><p>No recordings available</p></div>';
+                }
+            } catch (error) {
+                console.error('Error loading recordings:', error);
+            }
+        }
+
+        // Update statistics
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/security/status');
+                const data = await response.json();
+                
+                document.getElementById('totalDetections').textContent = data.detections_today || 0;
+                document.getElementById('activeAlerts').textContent = data.alerts_active || 0;
+                document.getElementById('recordingsCount').textContent = data.recordings_count || 0;
+                document.getElementById('currentFPS').textContent = (data.fps || 0).toFixed(1);
+                
+                if (data.running) {
+                    updateSystemStatus('online', 'System Running');
+                    document.getElementById('streamOverlay').style.display = 'none';
+                } else {
+                    updateSystemStatus('warning', 'System Stopped');
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+                updateSystemStatus('offline', 'Connection Error');
+            }
+        }
+
+        // Handle video stream
+        const streamImg = document.getElementById('liveStream');
+        streamImg.onerror = function() {
+            document.getElementById('streamOverlay').style.display = 'flex';
+            document.getElementById('streamOverlay').innerHTML = '<p>Video stream unavailable</p>';
+        };
+        streamImg.onload = function() {
+            document.getElementById('streamOverlay').style.display = 'none';
+        };
+    </script>
+</body>
+</html>
