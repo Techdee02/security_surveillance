@@ -306,11 +306,6 @@ Contributions welcome! Please ensure:
 - ✅ All data stored locally in SQLite database
 - ✅ Video recordings saved locally only
 
----
-
-## 📝 License
-
-This project is part of the EdgeAI-IoT challenge.
 
 ---
 
